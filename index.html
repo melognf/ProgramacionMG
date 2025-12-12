@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Plan de Producción — Mobile</title>
+  <meta name="theme-color" content="#e10600" />
+  <link rel="stylesheet" href="estilos.css" />
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#8b0000">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+  <!-- XLSX (SheetJS) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Chart.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="dot"></div>
+      <div>
+        <div class="title">Plan de Producción</div>
+        <div class="subtitle" id="subtitle">Cargar Excel para convertir a dashboard</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <label class="btn">
+        <input id="file" type="file" accept=".xlsx,.xls" hidden />
+        Seleccionar Excel
+      </label>
+      <button class="btn ghost" id="btnDemo" type="button">Limpiar</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="grid">
+      <div class="card">
+        <div class="card-h">Totales</div>
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi-l">Tarimas (Total)</div>
+            <div class="kpi-v" id="kpiTarimas">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-l">SKUs</div>
+            <div class="kpi-v" id="kpiSkus">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-l">Líneas</div>
+            <div class="kpi-v" id="kpiLineas">—</div>
+          </div>
+        </div>
+
+        <div class="hint" id="hint">
+          Consejo: en el celular podés compartir/abrir el Excel con el navegador y seleccionar el archivo desde “Archivos”.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">Tarimas por día (Total)</div>
+        <div class="chartWrap">
+          <canvas id="chartDia"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">Tarimas por línea (Total)</div>
+        <div class="chartWrap">
+          <canvas id="chartLinea"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section class="toolbar card">
+  <div class="toolbarRow">
+    <div class="field">
+      <label>Día</label>
+      <select id="fDia">
+        <option value="__ALL__">Todos</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Línea</label>
+      <select id="fLinea">
+        <option value="__ALL__">Todas</option>
+      </select>
+    </div>
+
+    <div class="field grow">
+      <label>Buscar sabor / producto / SKU</label>
+      <input id="q" type="search" placeholder="Ej: Cepita, Powerade, 129300..." />
+    </div>
+  </div>
+</section>
+
+<section id="turnoView" class="list"></section>
+
+
+    <section id="list" class="list"></section>
+
+    <section class="footer">
+      <div class="footnote">
+        Vista optimizada para celular: solo scroll vertical. Si tu plantilla cambia, se ajusta el parser.
+      </div>
+    </section>
+  </main>
+</body>
+</html>
