@@ -299,7 +299,7 @@ input::placeholder{ color: rgba(255,255,255,.45); }
   content:"";
   position:absolute;
   inset:0;
-  background:#ffffff;     /* alternado */
+  background: rgba(255,255,255,.06);
   z-index:0;
 }
 
