@@ -270,13 +270,13 @@ function renderTurnoView(){
     const safeTitle = norm(r.producto) || "(Sin descripción)";
 
     return `
-      <article class="item open"
+      <article class="item open ${altClass}"
         data-k="${keyEnc}"
         data-p1="${p1}"
         data-p2="${p2}"
         data-p3="${p3}">
 
-        <div class="itemTop ${altClass}">
+        <div class="itemTop">
 
           <div class="col">
             <div class="itemTitle">${safeTitle}</div>
@@ -342,7 +342,7 @@ function renderTurnoView(){
     `;
   }).join("");
 
-  // (tu código de listeners queda igual abajo)
+  // listeners quedan igual
 }
 
 /* ==========================
