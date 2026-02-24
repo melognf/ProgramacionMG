@@ -250,7 +250,6 @@ function renderTurnoView(){
   const useAlt = rows.length >= 2;
 
   list.innerHTML = rows.map((r, i) => {
-
     const dd = getDay(r);
     const altClass = (useAlt && (i % 2 === 1)) ? "altBg" : "";
 
@@ -342,7 +341,59 @@ function renderTurnoView(){
     `;
   }).join("");
 
-  // listeners quedan igual
+  // ✅ Guardado + actualización SOLO de la card (sin re-render)
+  $$(".realInp", list).forEach(inp => {
+    inp.addEventListener("input", () => {
+      const card = inp.closest(".item");
+      if (!card) return;
+
+      const keyEnc = card.getAttribute("data-k");
+      if (!keyEnc) return;
+
+      const key = decodeURIComponent(keyEnc);
+      const shift = inp.getAttribute("data-sh");
+      const v = toNum(inp.value);
+
+      const map = loadRealMap();
+      map[key] = map[key] || {T1:0,T2:0,T3:0};
+      map[key][shift] = v;
+      saveRealMap(map);
+
+      const plan = {
+        T1: toNum(card.getAttribute("data-p1")),
+        T2: toNum(card.getAttribute("data-p2")),
+        T3: toNum(card.getAttribute("data-p3"))
+      };
+
+      const real = map[key];
+      const rTot = toNum(real.T1) + toNum(real.T2) + toNum(real.T3);
+      const pTot = plan.T1 + plan.T2 + plan.T3;
+
+      // total real
+      const totalEl = card.querySelector("[data-total-real]");
+      if (totalEl) totalEl.textContent = fmt(rTot);
+
+      // cumplimiento por turno
+      ["T1","T2","T3"].forEach(t => {
+        const pctEl = card.querySelector(`[data-pct-${t}]`); // -> [data-pct-T1], etc.
+        if (!pctEl) return;
+
+        const p = pct(real[t], plan[t]);
+        pctEl.className = `kpiPill ${pctClass(p)}`;
+        const valEl = pctEl.querySelector("div");
+        if(valEl) valEl.textContent = pctText(p);
+      });
+
+      // total día
+      const pctTotEl = card.querySelector("[data-pct-total]");
+      if (pctTotEl){
+        const p = pct(rTot, pTot);
+        pctTotEl.className = `kpiPill ${pctClass(p)}`;
+        const valEl = pctTotEl.querySelector("div");
+        if(valEl) valEl.textContent = pctText(p);
+      }
+    });
+  });
 }
 
 /* ==========================
