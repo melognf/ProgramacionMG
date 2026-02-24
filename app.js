@@ -224,10 +224,36 @@ if(fD === "__ALL__"){
 
   const getDay = (r) => r.byDay?.[dayKey] || {T1:0,T2:0,T3:0,Total:0};
 
-  rows.sort((a,b)=>{
-    if(a.linea !== b.linea) return a.linea.localeCompare(b.linea);
-    return (getDay(b).Total||0) - (getDay(a).Total||0);
-  });
+  function startTurn(dd){
+  const t1 = toNum(dd.T1), t2 = toNum(dd.T2), t3 = toNum(dd.T3);
+  if (t1 > 0) return 1;
+  if (t2 > 0) return 2;
+  if (t3 > 0) return 3;
+  return 9; // sin plan por turnos
+}
+
+rows.sort((a,b)=>{
+  // 1) Línea
+  if (a.linea !== b.linea) return a.linea.localeCompare(b.linea);
+
+  // 2) Turno de inicio (T1 antes que T2 antes que T3)
+  const da = getDay(a);
+  const db = getDay(b);
+  const sa = startTurn(da);
+  const sb = startTurn(db);
+  if (sa !== sb) return sa - sb;
+
+  // 3) (opcional) si arrancan en el mismo turno, ordená por Total (desc)
+  const ta = toNum(da.Total ?? (toNum(da.T1)+toNum(da.T2)+toNum(da.T3)));
+  const tb = toNum(db.Total ?? (toNum(db.T1)+toNum(db.T2)+toNum(db.T3)));
+  if (tb !== ta) return tb - ta;
+
+  // 4) desempate estable por producto / SKU
+  const pa = norm(a.producto).toLowerCase();
+  const pb = norm(b.producto).toLowerCase();
+  if (pa !== pb) return pa.localeCompare(pb);
+  return norm(a.sku).localeCompare(norm(b.sku));
+});
 
   const realMap = loadRealMap();
 
