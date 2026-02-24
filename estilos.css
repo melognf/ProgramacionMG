@@ -344,3 +344,25 @@ input::placeholder{ color: rgba(255,255,255,.45); }
 .ok   { border-color: rgba(33,197,93,.45);  background: rgba(33,197,93,.14); }
 .warn { border-color: rgba(245,158,11,.45); background: rgba(245,158,11,.14); }
 .bad  { border-color: rgba(239,68,68,.45);  background: rgba(239,68,68,.14); }
+
+
+/* Alternado SOLO en el contenedor principal de la card */
+.item.alt{
+  background:#ffffff;
+  color:#111;
+  border-color: rgba(0,0,0,.20);
+}
+
+/* Para que textos secundarios no queden “lavados” en blanco (si usás colores claros) */
+.item.alt .itemMeta,
+.item.alt .colTitle,
+.item.alt small{
+  color: rgba(0,0,0,.70);
+}
+
+/* Si tenés pills/badges pensados para fondo oscuro, esto ayuda a que se lean */
+.item.alt .pill{
+  background: rgba(0,0,0,.06);
+  border-color: rgba(0,0,0,.12);
+  color:#111;
+}

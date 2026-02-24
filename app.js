@@ -205,15 +205,14 @@ function renderTurnoView(){
   }
 
   // Si no hay día seleccionado, no mostramos cards
-if(fD === "__ALL__"){
-  list.innerHTML = `
-    <div class="card">
-      Seleccioná un <b>día</b> para ver los sabores por turno.
-    </div>
-  `;
-  return;
-}
-
+  if(fD === "__ALL__"){
+    list.innerHTML = `
+      <div class="card">
+        Seleccioná un <b>día</b> para ver los sabores por turno.
+      </div>
+    `;
+    return;
+  }
 
   const idx = Number(fD);
   const dayKey = state.days[idx]?.label;
@@ -225,40 +224,46 @@ if(fD === "__ALL__"){
   const getDay = (r) => r.byDay?.[dayKey] || {T1:0,T2:0,T3:0,Total:0};
 
   function startTurn(dd){
-  const t1 = toNum(dd.T1), t2 = toNum(dd.T2), t3 = toNum(dd.T3);
-  if (t1 > 0) return 1;
-  if (t2 > 0) return 2;
-  if (t3 > 0) return 3;
-  return 9; // sin plan por turnos
-}
+    const t1 = toNum(dd.T1), t2 = toNum(dd.T2), t3 = toNum(dd.T3);
+    if (t1 > 0) return 1;
+    if (t2 > 0) return 2;
+    if (t3 > 0) return 3;
+    return 9; // sin plan por turnos
+  }
 
-rows.sort((a,b)=>{
-  // 1) Línea
-  if (a.linea !== b.linea) return a.linea.localeCompare(b.linea);
+  rows.sort((a,b)=>{
+    // 1) Línea
+    if (a.linea !== b.linea) return a.linea.localeCompare(b.linea);
 
-  // 2) Turno de inicio (T1 antes que T2 antes que T3)
-  const da = getDay(a);
-  const db = getDay(b);
-  const sa = startTurn(da);
-  const sb = startTurn(db);
-  if (sa !== sb) return sa - sb;
+    // 2) Turno de inicio (T1 antes que T2 antes que T3)
+    const da = getDay(a);
+    const db = getDay(b);
+    const sa = startTurn(da);
+    const sb = startTurn(db);
+    if (sa !== sb) return sa - sb;
 
-  // 3) (opcional) si arrancan en el mismo turno, ordená por Total (desc)
-  const ta = toNum(da.Total ?? (toNum(da.T1)+toNum(da.T2)+toNum(da.T3)));
-  const tb = toNum(db.Total ?? (toNum(db.T1)+toNum(db.T2)+toNum(db.T3)));
-  if (tb !== ta) return tb - ta;
+    // 3) si arrancan en el mismo turno, ordená por Total (desc)
+    const ta = toNum(da.Total ?? (toNum(da.T1)+toNum(da.T2)+toNum(da.T3)));
+    const tb = toNum(db.Total ?? (toNum(db.T1)+toNum(db.T2)+toNum(db.T3)));
+    if (tb !== ta) return tb - ta;
 
-  // 4) desempate estable por producto / SKU
-  const pa = norm(a.producto).toLowerCase();
-  const pb = norm(b.producto).toLowerCase();
-  if (pa !== pb) return pa.localeCompare(pb);
-  return norm(a.sku).localeCompare(norm(b.sku));
-});
+    // 4) desempate estable por producto / SKU
+    const pa = norm(a.producto).toLowerCase();
+    const pb = norm(b.producto).toLowerCase();
+    if (pa !== pb) return pa.localeCompare(pb);
+    return norm(a.sku).localeCompare(norm(b.sku));
+  });
 
   const realMap = loadRealMap();
 
-  list.innerHTML = rows.map(r => {
+  // alternado SOLO si hay 2 o más sabores
+  const useAlt = rows.length >= 2;
+
+  list.innerHTML = rows.map((r, i) => {
     const dd = getDay(r);
+
+    // clase alternada: 2do, 4to, 6to...
+    const altClass = (useAlt && (i % 2 === 1)) ? "alt" : "";
 
     // Plan por turno (asumimos cajas)
     const p1 = toNum(dd.T1), p2 = toNum(dd.T2), p3 = toNum(dd.T3);
@@ -279,7 +284,7 @@ rows.sort((a,b)=>{
     const safeTitle = norm(r.producto) || "(Sin descripción)";
 
     return `
-      <article class="item open"
+      <article class="item open ${altClass}"
         data-k="${keyEnc}"
         data-p1="${p1}"
         data-p2="${p2}"
@@ -393,7 +398,6 @@ rows.sort((a,b)=>{
 
         const p = pct(real[t], plan[t]);
         pctEl.className = `kpiPill ${pctClass(p)}`;
-        // el texto está en el segundo div del pill (después del <small>)
         const valEl = pctEl.querySelector("div");
         if(valEl) valEl.textContent = pctText(p);
       });
