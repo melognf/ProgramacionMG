@@ -443,7 +443,13 @@ if (!skuStrTmp) {
   // si no hay sku, no es un sabor operable -> se ignora
   continue;
 }
-
+// ===============================
+// Ignorar "productos" que son solo números (ej: "882")
+// ===============================
+const prodClean = norm(producto).replace(/[.\s-]/g, "");
+if (prodClean && /^\d+$/.test(prodClean)) {
+  continue;
+}
     const hasAny = linea || producto || (sku != null && norm(sku) !== "");
     if(!hasAny) continue;
 
