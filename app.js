@@ -67,9 +67,9 @@ function pct(real, plan){
   return (real / plan) * 100;
 }
 function pctClass(p){
-  if(p == null) return "";
-  if(p >= 98 && p <= 110) return "ok";
-  if(p >= 85) return "warn";
+  if (p == null) return "";
+  if (p >= 98) return "ok";
+  if (p >= 85) return "warn";
   return "bad";
 }
 function pctText(p){
