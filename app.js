@@ -102,17 +102,39 @@ function renderCharts(){
   const lineLabels = Object.keys(totalsByLine);
   const lineValues = lineLabels.map(k => totalsByLine[k]);
 
+  const CHART_COLORS = [
+    "#e10600","#60a5fa","#c084fc","#34d399","#f59e0b",
+    "#f472b6","#38bdf8","#a3e635","#fb923c","#818cf8"
+  ];
+
   if(chartDia) chartDia.destroy();
   chartDia = new Chart(cDia, {
     type: "bar",
-    data: { labels: dayLabels, datasets: [{ label: "Tarimas", data: totalsByDay }] },
+    data: {
+      labels: dayLabels,
+      datasets: [{
+        label: "Tarimas",
+        data: totalsByDay,
+        backgroundColor: "rgba(225,6,0,.75)",
+        borderColor: "rgba(225,6,0,1)",
+        borderWidth: 1,
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: "rgba(255,255,255,.75)" }, grid: { color: "rgba(255,255,255,.08)" } },
-        y: { ticks: { color: "rgba(255,255,255,.75)" }, grid: { color: "rgba(255,255,255,.08)" } }
+        x: {
+          ticks: { color: "rgba(255,255,255,.7)", font: { size: 11 } },
+          grid: { color: "rgba(255,255,255,.06)" }
+        },
+        y: {
+          ticks: { color: "rgba(255,255,255,.7)", font: { size: 11 } },
+          grid: { color: "rgba(255,255,255,.06)" }
+        }
       }
     }
   });
@@ -120,12 +142,24 @@ function renderCharts(){
   if(chartLinea) chartLinea.destroy();
   chartLinea = new Chart(cLin, {
     type: "doughnut",
-    data: { labels: lineLabels, datasets: [{ label: "Tarimas", data: lineValues }] },
+    data: {
+      labels: lineLabels,
+      datasets: [{
+        label: "Tarimas",
+        data: lineValues,
+        backgroundColor: CHART_COLORS.slice(0, lineLabels.length),
+        borderColor: "rgba(0,0,0,.3)",
+        borderWidth: 2
+      }]
+    },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { position: "bottom", labels: { color: "rgba(255,255,255,.82)" } }
+        legend: {
+          position: "bottom",
+          labels: { color: "rgba(255,255,255,.82)", padding: 12, font: { size: 11 } }
+        }
       }
     }
   });
@@ -284,12 +318,16 @@ function renderTurnoView(){
     const key = makeItemKey(dayKey, r.linea, r.sku);
     const keyEnc = encodeURIComponent(key);
 
-    const real = realMap[key] || {T1:0,T2:0,T3:0};
+    const realEntry = realMap[key];
+    const real = realEntry || {T1:0,T2:0,T3:0};
     const r1 = toNum(real.T1), r2 = toNum(real.T2), r3 = toNum(real.T3);
     const rTot = r1+r2+r3;
 
-    const c1 = pct(r1,p1), c2 = pct(r2,p2), c3 = pct(r3,p3);
-    const cTot = pct(rTot, pTot);
+    const hasEntry = !!realEntry;
+    const c1   = hasEntry ? pct(r1,   p1)   : null;
+    const c2   = hasEntry ? pct(r2,   p2)   : null;
+    const c3   = hasEntry ? pct(r3,   p3)   : null;
+    const cTot = hasEntry ? pct(rTot, pTot) : null;
 
     const safeTitle = norm(r.producto) || "(Sin descripción)";
 
@@ -310,9 +348,9 @@ function renderTurnoView(){
 
             <div class="pills" style="margin-top:10px;">
               <span class="pill strong">Plan día: ${fmt(pTot)}</span>
-              <span class="pill">T1 ${fmt(p1)}</span>
-              <span class="pill">T2 ${fmt(p2)}</span>
-              <span class="pill">T3 ${fmt(p3)}</span>
+              <span class="pill pill-t1">T1 ${fmt(p1)}</span>
+              <span class="pill pill-t2">T2 ${fmt(p2)}</span>
+              <span class="pill pill-t3">T3 ${fmt(p3)}</span>
             </div>
           </div>
 
@@ -320,17 +358,17 @@ function renderTurnoView(){
             <div class="colTitle">Real (cajas)</div>
             <div class="miniTable">
               <div class="miniRow">
-                <div class="badge">T1</div>
+                <div class="badge badge-t1">T1</div>
                 <input class="inp realInp" inputmode="numeric" type="number" min="0"
                        data-sh="T1" value="${(real.T1 ?? "")}" placeholder="0" />
               </div>
               <div class="miniRow">
-                <div class="badge">T2</div>
+                <div class="badge badge-t2">T2</div>
                 <input class="inp realInp" inputmode="numeric" type="number" min="0"
                        data-sh="T2" value="${(real.T2 ?? "")}" placeholder="0" />
               </div>
               <div class="miniRow">
-                <div class="badge">T3</div>
+                <div class="badge badge-t3">T3</div>
                 <input class="inp realInp" inputmode="numeric" type="number" min="0"
                        data-sh="T3" value="${(real.T3 ?? "")}" placeholder="0" />
               </div>
@@ -345,13 +383,13 @@ function renderTurnoView(){
           <div class="col">
             <div class="colTitle">Cumplimiento</div>
             <div class="miniTable">
-              <div class="kpiPill ${pctClass(c1)}" data-pct-T1>
+              <div class="kpiPill shift-t1 ${pctClass(c1)}" data-pct-T1>
                 <small>T1</small><div>${pctText(c1)}</div>
               </div>
-              <div class="kpiPill ${pctClass(c2)}" data-pct-T2>
+              <div class="kpiPill shift-t2 ${pctClass(c2)}" data-pct-T2>
                 <small>T2</small><div>${pctText(c2)}</div>
               </div>
-              <div class="kpiPill ${pctClass(c3)}" data-pct-T3>
+              <div class="kpiPill shift-t3 ${pctClass(c3)}" data-pct-T3>
                 <small>T3</small><div>${pctText(c3)}</div>
               </div>
 
@@ -400,8 +438,9 @@ function renderTurnoView(){
         const pctEl = card.querySelector(`[data-pct-${t}]`);
         if (!pctEl) return;
 
+        const shiftClass = `shift-${t.toLowerCase()}`;
         const p = pct(real[t], plan[t]);
-        pctEl.className = `kpiPill ${pctClass(p)}`;
+        pctEl.className = `kpiPill ${shiftClass} ${pctClass(p)}`;
         const valEl = pctEl.querySelector("div");
         if(valEl) valEl.textContent = pctText(p);
       });
