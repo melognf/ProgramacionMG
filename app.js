@@ -128,12 +128,12 @@ function renderCharts(){
       plugins: { legend: { display: false } },
       scales: {
         x: {
-          ticks: { color: "rgba(255,255,255,.7)", font: { size: 11 } },
-          grid: { color: "rgba(255,255,255,.06)" }
+          ticks: { color: "rgba(0,0,0,.8)", font: { size: 11 } },
+          grid: { color: "rgba(0,0,0,.12)" }
         },
         y: {
-          ticks: { color: "rgba(255,255,255,.7)", font: { size: 11 } },
-          grid: { color: "rgba(255,255,255,.06)" }
+          ticks: { color: "rgba(0,0,0,.8)", font: { size: 11 } },
+          grid: { color: "rgba(0,0,0,.12)" }
         }
       }
     }
@@ -158,7 +158,7 @@ function renderCharts(){
       plugins: {
         legend: {
           position: "bottom",
-          labels: { color: "rgba(255,255,255,.82)", padding: 12, font: { size: 11 } }
+          labels: { color: "rgba(0,0,0,.8)", padding: 12, font: { size: 11 } }
         }
       }
     }
@@ -308,6 +308,40 @@ function renderTurnoView(){
   const realMap = loadRealMap();
   const useAlt = sortedRows.length >= 2;
 
+  // Corridas que se extienden mas de un dia (mismo linea+SKU con datos en
+  // varios dias dentro de su propio byDay, o repetido en varias filas).
+  // Miramos TODO state.rows/state.days -no solo el dia filtrado- para
+  // saber el total real de la corrida completa y en que dia termina.
+  const groupKey = (r) => `${r.linea}|${r.sku}`;
+  const activeDaysByGroup = {};
+  const totalByGroup = {};
+  for (const r of state.rows) {
+    const gk = groupKey(r);
+    if (!activeDaysByGroup[gk]) activeDaysByGroup[gk] = new Set();
+    if (totalByGroup[gk] == null) totalByGroup[gk] = 0;
+
+    state.days.forEach((d, di) => {
+      const rd = r.byDay?.[d.label];
+      const t = toNum(rd?.Total ?? (toNum(rd?.T1) + toNum(rd?.T2) + toNum(rd?.T3)));
+      if (t > 0) {
+        activeDaysByGroup[gk].add(di);
+        totalByGroup[gk] += t;
+      }
+    });
+  }
+  const lastActiveDayOfGroup = {};
+  for (const gk in activeDaysByGroup) {
+    lastActiveDayOfGroup[gk] = Math.max(...activeDaysByGroup[gk]);
+  }
+
+  const groupCount = {};
+  for (const r of sortedRows) {
+    const gk = groupKey(r);
+    groupCount[gk] = (groupCount[gk] || 0) + 1;
+  }
+  const lastIndexOfGroup = {};
+  sortedRows.forEach((r, i) => { lastIndexOfGroup[groupKey(r)] = i; });
+
   list.innerHTML = sortedRows.map((r, i) => {
     const dd = getDay(r);
     const altClass = (useAlt && (i % 2 === 1)) ? "altBg" : "";
@@ -401,6 +435,28 @@ function renderTurnoView(){
 
         </div>
       </article>
+      ${(() => {
+        const gk = groupKey(r);
+        const daysCount = activeDaysByGroup[gk]?.size || 0;
+        const spansMultipleDays = daysCount > 1;
+        const repeatsSameDay = groupCount[gk] > 1;
+        if (!spansMultipleDays && !repeatsSameDay) return "";
+
+        const isLastCardToday = lastIndexOfGroup[gk] === i;
+        const isLastActiveDay = idx === lastActiveDayOfGroup[gk];
+        if (!isLastCardToday || !isLastActiveDay) return "";
+
+        const label = spansMultipleDays ? `${daysCount} días` : `${groupCount[gk]} corridas`;
+        return `
+          <div class="card" style="padding:10px 14px; margin-top:-2px;">
+            <div class="pills">
+              <span class="pill strong">
+                Total ${safeTitle} (${label}): ${fmt(totalByGroup[gk])}
+              </span>
+            </div>
+          </div>
+        `;
+      })()}
     `;
   }).join("");
 
