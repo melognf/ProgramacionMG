@@ -23,9 +23,9 @@
   --warn: #b8860b;
   --warn-dim: #b8860b;
   --warn-border: #b8860b;
-  --bad: #800000;
-  --bad-dim: #800000;
-  --bad-border: #800000;
+  --bad: #ff0000;
+  --bad-dim: #ff0000;
+  --bad-border: #ff0000;
 
   /* Turnos */
   --t1: #008080;
