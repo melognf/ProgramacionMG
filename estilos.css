@@ -20,9 +20,9 @@
   --ok: #006400;
   --ok-dim: #006400;
   --ok-border: #006400;
-  --warn: #b8860b;
-  --warn-dim: #b8860b;
-  --warn-border: #b8860b;
+  --warn: #ffff00;
+  --warn-dim: #ffff00;
+  --warn-border: #ffff00;
   --bad: #ff0000;
   --bad-dim: #ff0000;
   --bad-border: #ff0000;
@@ -438,10 +438,11 @@ input::placeholder{ color: var(--text-dim); }
 
 /* Cumplimiento (sobreescribe el color de turno) */
 .ok  { background: var(--ok);   color: #ffffff; }
-.warn{ background: var(--warn); color: #ffffff; }
+.warn{ background: var(--warn); color: #000000; }
 .bad { background: var(--bad);  color: #ffffff; }
 
-.ok small, .warn small, .bad small{ opacity: .85; color: #ffffff; }
+.ok small, .bad small{ opacity: .85; color: #ffffff; }
+.warn small{ opacity: .85; color: #000000; }
 
 /* ==========================
    Alternado
