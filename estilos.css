@@ -335,7 +335,7 @@ input::placeholder{ color: var(--text-dim); }
    Columnas internas
 ========================== */
 .col{
-  background: var(--card-inner);
+  background: var(--card);
   border: none;
   border-radius: 0;
   padding: 10px;
@@ -415,7 +415,7 @@ input::placeholder{ color: var(--text-dim); }
   padding: 9px 11px;
   border-radius: 0;
   border: none;
-  background: #ffffff;
+  background: var(--card);
   box-shadow: var(--bevel-sunken-sm);
   font-weight: 800;
   font-size: 14px;
@@ -429,7 +429,7 @@ input::placeholder{ color: var(--text-dim); }
 
 /* Neutro - sin datos ingresados todavia */
 .kpiPill:not(.ok):not(.warn):not(.bad){
-  background: #ffffff;
+  background: var(--card);
   color: #707070;
 }
 .kpiPill:not(.ok):not(.warn):not(.bad) small{

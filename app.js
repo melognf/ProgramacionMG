@@ -353,15 +353,17 @@ function renderTurnoView(){
     const keyEnc = encodeURIComponent(key);
 
     const realEntry = realMap[key];
-    const real = realEntry || {T1:0,T2:0,T3:0};
+    const real = realEntry || {};
     const r1 = toNum(real.T1), r2 = toNum(real.T2), r3 = toNum(real.T3);
     const rTot = r1+r2+r3;
 
-    const hasEntry = !!realEntry;
-    const c1   = hasEntry ? pct(r1,   p1)   : null;
-    const c2   = hasEntry ? pct(r2,   p2)   : null;
-    const c3   = hasEntry ? pct(r3,   p3)   : null;
-    const cTot = hasEntry ? pct(rTot, pTot) : null;
+    const has1 = real.T1 != null, has2 = real.T2 != null, has3 = real.T3 != null;
+    const c1 = has1 ? pct(r1, p1) : null;
+    const c2 = has2 ? pct(r2, p2) : null;
+    const c3 = has3 ? pct(r3, p3) : null;
+
+    const enteredPlan = (has1?p1:0) + (has2?p2:0) + (has3?p3:0);
+    const cTot = (has1||has2||has3) ? pct(rTot, enteredPlan) : null;
 
     const safeTitle = norm(r.producto) || "(Sin descripción)";
 
@@ -470,11 +472,15 @@ function renderTurnoView(){
 
       const key = decodeURIComponent(keyEnc);
       const shift = inp.getAttribute("data-sh");
-      const v = toNum(inp.value);
+      const raw = inp.value;
 
       const map = loadRealMap();
-      map[key] = map[key] || {T1:0,T2:0,T3:0};
-      map[key][shift] = v;
+      map[key] = map[key] || {};
+      if (raw === "") {
+        delete map[key][shift];
+      } else {
+        map[key][shift] = toNum(raw);
+      }
       saveRealMap(map);
 
       const plan = {
@@ -484,8 +490,9 @@ function renderTurnoView(){
       };
 
       const real = map[key];
+      const has1 = real.T1 != null, has2 = real.T2 != null, has3 = real.T3 != null;
       const rTot = toNum(real.T1) + toNum(real.T2) + toNum(real.T3);
-      const pTot = plan.T1 + plan.T2 + plan.T3;
+      const enteredPlan = (has1?plan.T1:0) + (has2?plan.T2:0) + (has3?plan.T3:0);
 
       const totalEl = card.querySelector("[data-total-real]");
       if (totalEl) totalEl.textContent = fmt(rTot);
@@ -495,7 +502,8 @@ function renderTurnoView(){
         if (!pctEl) return;
 
         const shiftClass = `shift-${t.toLowerCase()}`;
-        const p = pct(real[t], plan[t]);
+        const has = real[t] != null;
+        const p = has ? pct(real[t], plan[t]) : null;
         pctEl.className = `kpiPill ${shiftClass} ${pctClass(p)}`;
         const valEl = pctEl.querySelector("div");
         if(valEl) valEl.textContent = pctText(p);
@@ -503,7 +511,7 @@ function renderTurnoView(){
 
       const pctTotEl = card.querySelector("[data-pct-total]");
       if (pctTotEl){
-        const p = pct(rTot, pTot);
+        const p = (has1||has2||has3) ? pct(rTot, enteredPlan) : null;
         pctTotEl.className = `kpiPill ${pctClass(p)}`;
         const valEl = pctTotEl.querySelector("div");
         if(valEl) valEl.textContent = pctText(p);
