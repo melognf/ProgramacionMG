@@ -345,7 +345,7 @@ input::placeholder{ color: var(--text-dim); }
 .colTitle{
   font-weight: 700;
   font-size: 11px;
-  color: var(--text-dim);
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: .4px;
   margin-bottom: 8px;
